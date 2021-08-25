@@ -1,0 +1,66 @@
+== Samsa Cliente
+*Exemplos de acesso à API do Samsa*
+
+'''
+Este projeto inclui um exemplo completo (`samsa.cliente.ClienteSamsa`) de acesso ao SAMSA, que vai da verificação de um sistema e cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se os eventos chegaram ao Kafka.
+
+O pacote `samsa.cliente.modelo` inclui todos os DTOs necessários para organizar a serializacao/desserializacao. Detalhes a seguir:
+
+=== Evento
+Classe base do sistema.
+
+[source,Java]
+----
+public class Evento {
+    String codSistema;
+    String codAtividade;
+    String dataHora;
+    String descricao;
+    String destinoIp;
+    String destinoPorta;
+    String destinoUrl;
+    String origemIp;
+    String origemHorasFuso;
+    String usuarioLogin;
+    String usuarioNome;
+    String usuarioSiglaLotacao;
+    Map<String, String> propriedades;
+}
+----
+
+=== Atividade
+Representa uma ação realizada no sistema que deve ser registrada no SAMSA. Pode ser visto como um 'tipo de evento'.
+
+[source,Java]
+----
+public class Atividade {
+    String codSistema;
+    String codAtividade;
+    String descAtividade;
+}
+----
+
+=== SituacaoEnvio
+Objeto retornado ao enviar um evento (endpoint `/enviar-evento`).
+
+[source,Java]
+----
+public class SituacaoEnvio {
+    CodSituacaoEnvio codSituacao; //ACEITO, REJEITADO, ERRO_INTERNO
+    String codEvento;
+    Map<String, String> erros;
+}
+----
+
+=== SituacaoRecebimento
+Objeto retornado ao consultar um evento (endpoint `/consultar-evento`) passando o código.
+
+[source,Java]
+----
+public class SituacaoRecebimento {
+  CodSituacaoRecebimento codSituacao; //PENDENTE, CONFIRMADO, NAO_ENCONTRADO, ERRO_INTERNO
+  String codEvento;
+  Map<String, String> erros;
+  String dataHoraConfirmacao;
+}
+----

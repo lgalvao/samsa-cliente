@@ -13,7 +13,10 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class ClienteSamsa {
-    final String URL_BASE = "http://localhost:9001";
+    // URL do Samsa
+    final String URL_BASE = "http://lakota:9001";
+
+    // Atividades definidas para auditoria no sistema
     final Map<String, String> atividades = Map.of(
             "LOGIN_SUCESSO", "Login no sistema realizado com sucesso",
             "LOGIN_FALHA", "Login ou senha incorretos ao se tentar logar",
@@ -21,10 +24,19 @@ public class ClienteSamsa {
             "CADASTRO_SISTEMA", "Novo sistema cadastrado",
             "ALTERACAO_SISTEMA", "Sistema existente alterado"
     );
+
+    // Cliente http nativo do Java (11 em diante)
     final HttpClient clienteHttp = HttpClient.newHttpClient();
+
+    // Serializador JSON
     final ObjectMapper mapeadorJson = new ObjectMapper();
+
+    // No exemplo, esse timeout é usado em todos os pontos, mas cada chamada pode ter um timeout diferente
+    // IMPORTANTE: Se o timeout ocorrer, o HttpRequest gera excecao de runtime. Precisa interceptar sempre!
     final long TIMEOUT = 1000;
 
+    // Simula uma interacao completa com o SAMSA, da verificacao do
+    // sistema ao cadastro de atividades e envio e consulta de eventos
     private void executar() throws Exception {
         // Presumindo que sistema sabe o seu código
         String COD_SISTEMA = "ACESSO";
@@ -73,21 +85,6 @@ public class ClienteSamsa {
             System.out.printf("Evento recebido no Kafka. Timestamp: %s", sitRecebimento.getDataHoraConfirmacao());
     }
 
-    private boolean sistemaExiste(String codSistema) throws Exception {
-        // Montar requisição HTTP para consulta de sistemas
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/consultar-sistema/" + codSistema))
-                .timeout(Duration.ofMillis(TIMEOUT))
-                .GET()
-                .build();
-
-        // Obter resposta HTTP com o JSON retornado
-        HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
-
-        // Se status ok e corpo retornado estiver preenchido, sistema foi encontrado
-        return (resp.statusCode() == 200 && !resp.body().isEmpty());
-    }
-
     private void cadastrarAtividade(Atividade atividade) throws Exception {
         // Serializar atividade para JSON
         String atividadeJson = mapeadorJson.writeValueAsString(atividade);
@@ -108,21 +105,8 @@ public class ClienteSamsa {
             System.out.println("Erro no cadastro de atividade " + atividade.getCodAtividade());
     }
 
-    private boolean atividadeExiste(String codSistema, String codAtividade) throws Exception {
-        // Montar requisição HTTP para consulta de sistemas
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/consultar-atividade/sistema/" + codSistema + "/atividade/" + codAtividade))
-                .timeout(Duration.ofMillis(TIMEOUT))
-                .GET()
-                .build();
-
-        // Obter resposta HTTP com o JSON retornado
-        HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
-
-        // Se status OK e corpo vier preenchido, atividade foi encontrada
-        return (resp.statusCode() == 200 && !resp.body().isEmpty());
-    }
-
+    // Simula a criacao de um evento. Nos sistemas, isso vai precisar ser realizado
+    // num local em que o request e o usuário logado estejam acessíveis
     private Evento criarEvento() {
         return new Evento()
                 .setCodSistema("ACESSO") // Sigla fixa para cada sistema
@@ -172,6 +156,36 @@ public class ClienteSamsa {
 
         // Desserializar o JSON e retornar o objeto SituacaoEnvio
         return mapeadorJson.readValue(resp.body(), SituacaoRecebimento.class);
+    }
+
+    private boolean sistemaExiste(String codSistema) throws Exception {
+        // Montar requisição HTTP para consulta de sistemas
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(URL_BASE + "/consultar-sistema/" + codSistema))
+                .timeout(Duration.ofMillis(TIMEOUT))
+                .GET()
+                .build();
+
+        // Obter resposta HTTP com o JSON retornado
+        HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
+
+        // Se status ok e corpo retornado estiver preenchido, sistema foi encontrado
+        return (resp.statusCode() == 200 && !resp.body().isEmpty());
+    }
+
+    private boolean atividadeExiste(String codSistema, String codAtividade) throws Exception {
+        // Montar requisição HTTP para consulta de sistemas
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(URL_BASE + "/consultar-atividade/sistema/" + codSistema + "/atividade/" + codAtividade))
+                .timeout(Duration.ofMillis(TIMEOUT))
+                .GET()
+                .build();
+
+        // Obter resposta HTTP com o JSON retornado
+        HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
+
+        // Se status OK e corpo vier preenchido, atividade foi encontrada
+        return (resp.statusCode() == 200 && !resp.body().isEmpty());
     }
 
     public static void main(String[] args) throws Exception {
