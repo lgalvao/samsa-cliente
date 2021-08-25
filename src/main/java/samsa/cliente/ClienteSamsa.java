@@ -84,9 +84,6 @@ public class ClienteSamsa {
         // Obter resposta HTTP com o JSON retornado
         HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
 
-        // Desserializar o JSON para um array de sistemas
-        Sistema sistema = mapeadorJson.readValue(resp.body(), Sistema.class);
-
         // Se status ok e corpo retornado estiver preenchido, sistema foi encontrado
         return (resp.statusCode() == 200 && !resp.body().isEmpty());
     }
