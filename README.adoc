@@ -1,7 +1,6 @@
 == Samsa Cliente
 *Exemplos de acesso à API do Samsa*
 
-'''
 Este projeto inclui um exemplo completo (`samsa.cliente.ClienteSamsa`) de acesso ao SAMSA, que vai da verificação de um sistema e cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se os eventos chegaram ao Kafka.
 
 O pacote `samsa.cliente.modelo` inclui todos os DTOs necessários para organizar a serializacao/desserializacao. Detalhes a seguir:
@@ -53,7 +52,7 @@ public class SituacaoEnvio {
 ----
 
 === SituacaoRecebimento
-Objeto retornado ao consultar um evento (endpoint `/consultar-evento`) passando o código.
+Objeto retornado ao consultar um evento (endpoint `/consultar-evento`), passando o código.
 
 [source,Java]
 ----
@@ -64,3 +63,7 @@ public class SituacaoRecebimento {
   String dataHoraConfirmacao;
 }
 ----
+
+=== Endpoints da API
+
+image::endpoints.png[]
