@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
-public class ClienteSamsa {
+public class ClienteSamsaCompleto {
     // URL do Samsa
     final String URL_BASE = "http://lakota:9001";
 
@@ -189,6 +189,6 @@ public class ClienteSamsa {
     }
 
     public static void main(String[] args) throws Exception {
-        new ClienteSamsa().executar();
+        new ClienteSamsaCompleto().executar();
     }
 }

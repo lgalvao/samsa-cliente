@@ -1,12 +1,46 @@
-== Samsa Cliente
+= Samsa Cliente
+
 *Exemplos de acesso à API do Samsa*
 
-Este projeto inclui um exemplo completo (`samsa.cliente.ClienteSamsa`) de acesso ao SAMSA, que vai da verificação de um sistema e cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se os eventos chegaram ao Kafka.
+== Os exemplos
+Este projeto inclui dois exemplo de uso do SAMSA.
 
-O pacote `samsa.cliente.modelo` inclui todos os DTOs necessários para organizar a serializacao/desserializacao. Detalhes a seguir:
+* Um exemplo completo (`samsa.cliente.ClienteSamsaCompleto`) que vai da verificação de um sistema e cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se os eventos chegaram ao Kafka.
+* Um exemplo mínimo (`samsa.cliente.ClienteSamsaMinimo`) que presume a existência do Sistema e das Atividades, e faz o envio de um evento – mas sem depois verificar a chegada no Kafka.
+
+Os exemplos são ilustrativos. A forma de usar nos seus sistemas vai variar bastante, de acordo com a arquitetura e a tecnologia utilizadas.
+
+== Ferramentas e Dependências
+Os exemplos usam a API HttpClient, nativa no Java 11 em diante, e o Jackson para mapear objetos de/para JSON. Também é usado o Lombok para redução de código 'boilerplate'.
+
+Sobre HttpClient:
+
+* https://openjdk.java.net/groups/net/httpclient/recipes.html
+
+Sobre Jackson:
+
+* https://www.baeldung.com/jackson-object-mapper-tutorial
+
+Sobre Lombok:
+
+* https://www.baeldung.com/intro-to-project-lombok
+
+
+== Como executar
+Os exemplos usam o gradle, mas não é necessário instalar a ferramenta. No Windows, rode:
+
+[source,shell script]
+----
+gradle run
+----
+
+Isso irá executar o exemplo completo.
+
+== DTOs
+O pacote `samsa.cliente.modelo` inclui os DTOs úteis para organizar a serializacao/desserializacao. Detalhes sobre esses DTOS a seguir:
 
 === Evento
-Classe base do sistema.
+Conceito principal do sistema.
 
 [source,Java]
 ----
@@ -28,7 +62,7 @@ public class Evento {
 ----
 
 === Atividade
-Representa uma ação realizada no sistema que deve ser registrada no SAMSA. Pode ser visto como um 'tipo de evento'.
+Ação realizada no sistema que deve ser registrada no SAMSA. Pode ser visto como um 'tipo de evento'.
 
 [source,Java]
 ----
@@ -40,7 +74,7 @@ public class Atividade {
 ----
 
 === SituacaoEnvio
-Objeto retornado ao enviar um evento (endpoint `/enviar-evento`).
+Agrega dados/erros retornados ao enviar um evento (endpoint `/enviar-evento`).
 
 [source,Java]
 ----
@@ -52,7 +86,7 @@ public class SituacaoEnvio {
 ----
 
 === SituacaoRecebimento
-Objeto retornado ao consultar um evento (endpoint `/consultar-evento`), passando o código.
+Agrega dados retornados ao consultar um evento (endpoint `/consultar-evento`), passando o código.
 
 [source,Java]
 ----
@@ -65,5 +99,4 @@ public class SituacaoRecebimento {
 ----
 
 === Endpoints da API
-
-image::endpoints.png[]
+image::endpoints.png[http://lakota:9001]
