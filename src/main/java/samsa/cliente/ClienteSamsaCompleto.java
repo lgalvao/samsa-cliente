@@ -1,7 +1,7 @@
 package samsa.cliente;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import samsa.cliente.modelo.*;
+import samsa.comum.*;
 
 import java.io.IOException;
 import java.net.URI;

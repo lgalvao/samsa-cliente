@@ -1,9 +1,9 @@
 package samsa.cliente;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import samsa.cliente.modelo.CodSituacaoEnvio;
-import samsa.cliente.modelo.Evento;
-import samsa.cliente.modelo.SituacaoEnvio;
+import samsa.comum.CodSituacaoEnvio;
+import samsa.comum.Evento;
+import samsa.comum.SituacaoEnvio;
 
 import java.net.URI;
 import java.net.http.HttpClient;

@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'samsa-cliente'
-version '0.1'
+version '0.8.2'
 
 compileJava {
     sourceCompatibility = '11'
