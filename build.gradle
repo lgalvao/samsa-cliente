@@ -1,13 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'samsa-cliente'
 version '0.8.2'
 
 compileJava {
-    sourceCompatibility = '11'
-    targetCompatibility = '11'
+    sourceCompatibility = '16'
+    targetCompatibility = '16'
 }
 
 repositories {
@@ -19,8 +20,6 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
-
-apply plugin: 'application'
 
 mainClassName = 'samsa.cliente.ClienteSamsaCompleto'
 
