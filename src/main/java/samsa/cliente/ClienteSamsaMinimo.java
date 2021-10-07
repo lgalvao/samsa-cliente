@@ -13,12 +13,15 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
+import static java.lang.System.out;
+
 /**
  * Exemplo mínimo de acesso a API do SAMSA. Presume existência do
  * sistema e das atividades auditadas, e não verifica o recebimento no Kafka
  */
 public class ClienteSamsaMinimo {
-    // Simula uma interacao simples com o SAMSA, presumindo que sistema e atividades estejam OK
+    // Simula uma interacao simples com o SAMSA, presumindo que sistema e atividades estejam OK.
+    // Não verifica se evento de fato chegou ao Kafka
     void executar() throws Exception {
         // Montar objeto Evento
         Evento evento = criarEvento();
@@ -28,9 +31,9 @@ public class ClienteSamsaMinimo {
 
         // Verificar retorno do envio: ACEITO -> passou na validacao; REJEITADO -> 'erros' vem preenchido
         if (sitEnvio.getCodSituacao() == CodSituacaoEnvio.ACEITO)
-            System.out.printf("Evento enviado. Código: %s %n", sitEnvio.getCodEvento());
+            out.printf("Evento enviado. Código: %s %n", sitEnvio.getCodEvento());
         else
-            System.out.printf("Evento não enviado. Erros: %s %n", sitEnvio.getErros());
+            out.printf("Evento não enviado. Erros: %s %n", sitEnvio.getErros());
     }
 
     // Simula criacao de evento. Nos sistemas, feito onde o request/usuário estejam acessíveis
@@ -63,7 +66,7 @@ public class ClienteSamsaMinimo {
         String eventoJson = mapeadorJson.writeValueAsString(evento);
 
         // URL de envio
-        String URL = "http://lakota:9001/enviar-evento";
+        String URL = "http://localhost:9001/api/evento";
 
         // Montar requisição HTTP para envio de evento
         HttpRequest req = HttpRequest.newBuilder()

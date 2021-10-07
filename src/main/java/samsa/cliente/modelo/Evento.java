@@ -6,6 +6,7 @@ import java.util.Map;
 
 @Data
 public class Evento {
+    String codigo;
     String codSistema;
     String codAtividade;
     String dataHora;

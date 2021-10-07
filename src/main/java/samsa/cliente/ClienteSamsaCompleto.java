@@ -1,5 +1,6 @@
 package samsa.cliente;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import samsa.cliente.modelo.*;
 
@@ -12,9 +13,11 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
+import static java.lang.System.out;
+
 public class ClienteSamsaCompleto {
     // URL do Samsa
-    final String URL_BASE = "http://lakota:9001";
+    final String URL_BASE = "http://localhost:9001/api";
 
     // Atividades definidas para auditoria no sistema
     final Map<String, String> atividades = Map.of(
@@ -29,7 +32,8 @@ public class ClienteSamsaCompleto {
     final HttpClient clienteHttp = HttpClient.newHttpClient();
 
     // Serializador JSON
-    final ObjectMapper mapeadorJson = new ObjectMapper();
+    final ObjectMapper mapeadorJson = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
     // No exemplo, esse timeout é usado em todos os pontos, mas cada chamada pode ter um timeout diferente
     // IMPORTANTE: Se o timeout ocorrer, o HttpRequest gera excecao de runtime. Precisa interceptar sempre!
@@ -42,7 +46,7 @@ public class ClienteSamsaCompleto {
         String COD_SISTEMA = "ACESSO";
 
         // Verificar se sistema existe; se não existir, precisa solicitar externamente e nada a fazer aqui
-        if (sistemaExiste(COD_SISTEMA)) System.out.printf("Sistema %s encontrado.%n", COD_SISTEMA);
+        if (sistemaExiste(COD_SISTEMA)) out.printf("Sistema %s encontrado.%n", COD_SISTEMA);
         else return;
 
         // Cadastrar atividades para o sistema
@@ -61,8 +65,7 @@ public class ClienteSamsaCompleto {
 
         // Verificar se atividades foram realmente cadastradas
         for (String codAtividade : atividades.keySet()) {
-            if (!atividadeExiste(COD_SISTEMA, codAtividade))
-                System.out.printf("Atividade %s não encontrada.%n", codAtividade);
+            if (!atividadeExiste(COD_SISTEMA, codAtividade)) out.printf("Atividade %s não encontrada.%n", codAtividade);
         }
 
         // Montar objeto Evento
@@ -73,16 +76,18 @@ public class ClienteSamsaCompleto {
 
         // A situacao ACEITO indica que evento passou na validacao; caso contrário 'erros' vem preenchido
         if (sitEnvio.getCodSituacao() == CodSituacaoEnvio.ACEITO)
-            System.out.printf("Evento enviado. Código %s %n", sitEnvio.getCodEvento());
+            out.printf("Evento enviado. Código %s %n", sitEnvio.getCodEvento());
         else
-            System.out.printf("Evento não enviado. Erros: %s %n", sitEnvio.getErros());
+            out.printf("Evento não enviado. Erros: %s %n", sitEnvio.getErros());
 
         // Verificar chegada do evento no Kafka, usando código do evento
         SituacaoRecebimento sitRecebimento = consultarEvento(sitEnvio.getCodEvento());
 
         // A situacao CONFIRMADO indica que evento foi gravado no Kafka
-        if (sitRecebimento.getCodSituacao() == CodSituacaoRecebimento.CONFIRMADO)
-            System.out.printf("Evento recebido no Kafka. Timestamp: %s", sitRecebimento.getDataHoraConfirmacao());
+        if (sitRecebimento.getCodSituacao() == CodSituacaoRecebimento.CONFIRMADO) {
+            out.printf("Evento recebido no Kafka. Timestamp: %s", sitRecebimento.getDataHoraConfirmacao());
+            out.printf("%nConteúdo do evento. %s", sitRecebimento.getEvento());
+        }
     }
 
     private void cadastrarAtividade(Atividade atividade) throws Exception {
@@ -91,7 +96,7 @@ public class ClienteSamsaCompleto {
 
         // Montar requisição HTTP
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/cadastrar-atividade"))
+                .uri(URI.create(URL_BASE + "/atividades"))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(atividadeJson))
@@ -100,9 +105,9 @@ public class ClienteSamsaCompleto {
         // Enviar requisição e tratar código da resposta
         HttpResponse<String> resp = clienteHttp.send(req, HttpResponse.BodyHandlers.ofString());
         if (resp.statusCode() == 201)
-            System.out.printf("Atividade %s cadastrada.%n", atividade.getCodAtividade());
+            out.printf("Atividade %s cadastrada.%n", atividade.getCodAtividade());
         else
-            System.out.println("Erro no cadastro de atividade " + atividade.getCodAtividade());
+            out.println("Erro no cadastro de atividade " + atividade.getCodAtividade());
     }
 
     // Simula a criacao de um evento. Nos sistemas, isso vai precisar ser realizado
@@ -130,7 +135,7 @@ public class ClienteSamsaCompleto {
 
         // Montar requisição HTTP para envio de evento
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/enviar-evento"))
+                .uri(URI.create(URL_BASE + "/evento"))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(eventoJson))
@@ -146,7 +151,7 @@ public class ClienteSamsaCompleto {
     private SituacaoRecebimento consultarEvento(String codEvento) throws IOException, InterruptedException {
         // Montar requisição HTTP para consultae evento enviado
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/consultar-evento/" + codEvento))
+                .uri(URI.create(URL_BASE + "/evento/" + codEvento))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .GET()
                 .build();
@@ -161,7 +166,7 @@ public class ClienteSamsaCompleto {
     private boolean sistemaExiste(String codSistema) throws Exception {
         // Montar requisição HTTP para consulta de sistemas
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/consultar-sistema/" + codSistema))
+                .uri(URI.create(URL_BASE + "/sistemas/" + codSistema))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .GET()
                 .build();
@@ -176,7 +181,7 @@ public class ClienteSamsaCompleto {
     private boolean atividadeExiste(String codSistema, String codAtividade) throws Exception {
         // Montar requisição HTTP para consulta de sistemas
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + "/consultar-atividade/sistema/" + codSistema + "/atividade/" + codAtividade))
+                .uri(URI.create(URL_BASE + "/atividades/sistema/" + codSistema + "/atividade/" + codAtividade))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .GET()
                 .build();
