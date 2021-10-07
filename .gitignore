@@ -1,5 +1,8 @@
-/.gradle/
 /.idea/
-/build/
+/.gradle/
 /gradle/
+/build/
+/gen/
 /out/
+/src/main/generated/
+/src/test/generated_tests/

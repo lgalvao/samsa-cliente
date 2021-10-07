@@ -1,4 +1,4 @@
-package samsa.cliente.modelo;
+package samsa.comum;
 
 import lombok.Data;
 
