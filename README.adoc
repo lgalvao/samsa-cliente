@@ -5,7 +5,7 @@
 == Os exemplos
 Este projeto inclui dois exemplo de uso do SAMSA.
 
-* Um exemplo completo (`samsa.cliente.ClienteSamsaCompleto`) que vai da verificação de um sistema e cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se os eventos chegaram ao Kafka.
+* Um exemplo completo (`samsa.cliente.ClienteSamsaCompleto`) que vai do cadastro de atividades a serem auditadas, até o envio de eventos e a posterior verificação se chegaram ao Kafka.
 * Um exemplo mínimo (`samsa.cliente.ClienteSamsaMinimo`) que presume a existência do Sistema e das Atividades, e faz o envio de um evento – mas sem depois verificar a chegada no Kafka.
 
 Os exemplos são ilustrativos. A forma de usar nos seus sistemas vai variar bastante, de acordo com a arquitetura e a tecnologia utilizadas.
@@ -40,11 +40,12 @@ Isso irá executar o exemplo completo.
 O pacote `samsa.cliente.modelo` inclui os DTOs úteis para organizar a serializacao/desserializacao. Detalhes sobre esses DTOS a seguir:
 
 === Evento
-Conceito principal do sistema.
+Conceito principal do Samsa, representa algo significativo que aconteceu no seu sistema.
 
 [source,Java]
 ----
 public class Evento {
+    String codigo; // Preenchido pela API
     String codSistema;
     String codAtividade;
     String dataHora;
@@ -61,6 +62,32 @@ public class Evento {
 }
 ----
 
+=== SituacaoEnvio
+Agrega dados/erros retornados ao enviar um evento (endpoint `/evento`), com método `GET`.
+
+[source,Java]
+----
+public class SituacaoEnvio {
+    CodSituacaoEnvio codSituacao; //ACEITO, REJEITADO, ERRO_INTERNO
+    String codEvento;
+    Map<String, String> erros;
+}
+----
+
+=== SituacaoRecebimento
+Agrega dados retornados ao consultar um evento (endpoint `/evento`), passando o código.
+
+[source,Java]
+----
+public class SituacaoRecebimento {
+  CodSituacaoRecebimento codSituacao; //PENDENTE, CONFIRMADO, NAO_ENCONTRADO, ERRO_INTERNO
+  String codEvento;
+  Map<String, String> erros;
+  String dataHoraConfirmacao;
+  Evento evento; // Se status é CONFIRMADO, contém o evento completo escrito no Kafka
+}
+----
+
 === Atividade
 Ação realizada no sistema que deve ser registrada no SAMSA. Pode ser visto como um 'tipo de evento'.
 
@@ -73,30 +100,8 @@ public class Atividade {
 }
 ----
 
-=== SituacaoEnvio
-Agrega dados/erros retornados ao enviar um evento (endpoint `/enviar-evento`).
+Os principais
+endpoints de atividades são:
 
-[source,Java]
-----
-public class SituacaoEnvio {
-    CodSituacaoEnvio codSituacao; //ACEITO, REJEITADO, ERRO_INTERNO
-    String codEvento;
-    Map<String, String> erros;
-}
-----
-
-=== SituacaoRecebimento
-Agrega dados retornados ao consultar um evento (endpoint `/consultar-evento`), passando o código.
-
-[source,Java]
-----
-public class SituacaoRecebimento {
-  CodSituacaoRecebimento codSituacao; //PENDENTE, CONFIRMADO, NAO_ENCONTRADO, ERRO_INTERNO
-  String codEvento;
-  Map<String, String> erros;
-  String dataHoraConfirmacao;
-}
-----
-
-=== Endpoints da API
-image::endpoints.png[http://lakota:9001]
+* `GET /atividades/(codSistema)`
+* `POST /atividades`

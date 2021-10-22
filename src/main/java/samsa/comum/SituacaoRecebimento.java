@@ -10,4 +10,5 @@ public class SituacaoRecebimento {
     String codEvento;
     Map<String, String> erros;
     String dataHoraConfirmacao;
+    Evento evento;
 }
