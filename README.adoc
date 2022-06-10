@@ -54,7 +54,7 @@ public class Evento {
     String destinoPorta;
     String destinoUrl;
     String origemIp;
-    String origemHorasFuso;
+    Integer origemHorasFuso;
     String usuarioLogin;
     String usuarioNome;
     String usuarioSiglaLotacao;
